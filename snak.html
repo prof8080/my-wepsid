@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لعبة الثعبان الاحترافية</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle, rgba(72, 61, 139, 0.7), rgba(0, 0, 0, 0.9));
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    canvas {
+      border: 3px solid #fff;
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+      background-color: #2b2b2b;
+      border-radius: 10px;
+      box-sizing: border-box;
+    }
+
+    #score {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: #fff;
+      font-size: 24px;
+      text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+    }
+
+    #gameOver {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ff0000;
+      font-size: 40px;
+      font-weight: bold;
+      text-shadow: 0 0 15px #ff0000;
+      display: none;
+    }
+
+    header {
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      text-align: center;
+      padding: 10px;
+      font-size: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    footer {
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      text-align: center;
+      padding: 10px;
+      position: absolute;
+      bottom: 0;
+      font-size: 14px;
+      box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    #gameControls {
+      margin-top: 20px;
+    }
+
+    #gameControls button {
+      background: #ff416c;
+      border: none;
+      padding: 10px 20px;
+      color: white;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    #gameControls button:hover {
+      background: #ff4b2b;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <div>لعبة الثعبان الاحترافية</div>
+    <div><a style="background-color: #fff;" href="index.html">Back</a></div>
+  </header>
+  
+  <!-- تغيير الحجم هنا -->
+  <canvas id="gameCanvas" width="800" height="400"></canvas> <!-- الحجم الجديد 800x800 -->
+  
+  <div id="score">النقاط: 0</div>
+  <div id="gameOver">اللعبة انتهت! اضغط أي مفتاح للبدء من جديد</div>
+  <div id="gameControls">
+    <button id="startBtn">بدء اللعبة</button>
+  </div>
+  <footer>
+    &copy; 2025 جميع الحقوق محفوظة - تصميم: prof.dr.sh
+  </footer>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const snakeSize = 20; // حجم كل جزء من الثعبان
+    let snake = [{ x: 200, y: 200 }];
+    let food = { x: 0, y: 0 };
+    let dx = snakeSize;
+    let dy = 0;
+    let score = 0;
+    let gameOver = false;
+    let isGameOverDisplayed = false;
+
+    // Generate food at a random position
+    function generateFood() {
+      food.x = Math.floor(Math.random() * (canvas.width / snakeSize)) * snakeSize;
+      food.y = Math.floor(Math.random() * (canvas.height / snakeSize)) * snakeSize;
+    }
+
+    // Draw the game elements (snake and food)
+    function drawGame() {
+      if (gameOver) {
+        if (!isGameOverDisplayed) {
+          document.getElementById("gameOver").style.display = "block";
+          isGameOverDisplayed = true;
+        }
+        return;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Move snake
+      const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+      snake.unshift(head);
+
+      // Check for collision with food
+      if (head.x === food.x && head.y === food.y) {
+        score++;
+        generateFood();
+        playFoodSound();
+      } else {
+        snake.pop();
+      }
+
+      // Check for collision with walls or self
+      if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || collisionWithSelf()) {
+        gameOver = true;
+      }
+
+      // Draw the snake with a glowing effect
+      ctx.fillStyle = "lime";
+      snake.forEach((segment, index) => {
+        ctx.fillRect(segment.x, segment.y, snakeSize, snakeSize);
+        if (index === 0) {
+          ctx.fillStyle = "yellow"; // Head of the snake
+        }
+      });
+
+      // Draw the food with a glowing effect
+      ctx.fillStyle = "red";
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = "rgba(255, 0, 0, 0.7)";
+      ctx.fillRect(food.x, food.y, snakeSize, snakeSize);
+      ctx.shadowBlur = 0;
+
+      // Display score with a glowing effect
+      document.getElementById("score").textContent = `النقاط: ${score}`;
+
+      setTimeout(drawGame, 100);
+    }
+
+    // Play sound when the snake eats food
+    function playFoodSound() {
+      const audio = new Audio('https://www.soundjay.com/button/beep-07.wav');
+      audio.play();
+    }
+
+    // Detect collision with the snake's own body
+    function collisionWithSelf() {
+      for (let i = 1; i < snake.length; i++) {
+        if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // Change direction based on key presses
+    function changeDirection(event) {
+      if (event.key === "ArrowUp" && dy === 0) {
+        dx = 0;
+        dy = -snakeSize;
+      } else if (event.key === "ArrowDown" && dy === 0) {
+        dx = 0;
+        dy = snakeSize;
+      } else if (event.key === "ArrowLeft" && dx === 0) {
+        dx = -snakeSize;
+        dy = 0;
+      } else if (event.key === "ArrowRight" && dx === 0) {
+        dx = snakeSize;
+        dy = 0;
+      }
+
+      // Restart the game when any key is pressed after game over
+      if (gameOver) {
+        gameOver = false;
+        snake = [{ x: 200, y: 200 }];
+        dx = snakeSize;
+        dy = 0;
+        score = 0;
+        isGameOverDisplayed = false;
+        generateFood();
+        document.getElementById("gameOver").style.display = "none";
+        drawGame();
+      }
+    }
+
+    window.addEventListener("keydown", changeDirection);
+
+    // Start the game
+    generateFood();
+    drawGame();
+
+    // Button to start the game
+    document.getElementById("startBtn").addEventListener("click", () => {
+      document.getElementById("gameOver").style.display = "none";
+      gameOver = false;
+      snake = [{ x: 200, y: 200 }];
+      dx = snakeSize;
+      dy = 0;
+      score = 0;
+      isGameOverDisplayed = false;
+      generateFood();
+      drawGame();
+    });
+  </script>
+</body>
+</html>

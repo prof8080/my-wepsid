@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المغامر السحري - الإصدار المعدل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* نفس الأنماط السابقة... */
+    </style>
+</head>
+<body>
+    <!-- نفس الهيكل HTML السابق... -->
+
+    <!-- نغير مصادر الصوت لاستخدام بيانات مضمنة (Base64) لتجنب مشاكل الروابط -->
+    <audio id="jumpSound" preload="auto">
+        <source src="data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV" type="audio/mpeg">
+    </audio>
+    
+    <audio id="collectSound" preload="auto">
+        <source src="data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV" type="audio/mpeg">
+    </audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // العناصر الصوتية
+            const jumpSound = document.getElementById('jumpSound');
+            const collectSound = document.getElementById('collectSound');
+            const gameOverSound = document.getElementById('gameOverSound');
+            const backgroundMusic = document.getElementById('backgroundMusic');
+            
+            // متغير لمعرفة إذا كان المستخدم قد تفاعل مع الصفحة
+            let userInteracted = false;
+            
+            // نافذة بدء اللعبة مع زر تفاعل
+            const startScreen = document.createElement('div');
+            startScreen.style.position = 'absolute';
+            startScreen.style.top = '0';
+            startScreen.style.left = '0';
+            startScreen.style.width = '100%';
+            startScreen.style.height = '100%';
+            startScreen.style.background = 'rgba(0,0,0,0.8)';
+            startScreen.style.display = 'flex';
+            startScreen.style.flexDirection = 'column';
+            startScreen.style.justifyContent = 'center';
+            startScreen.style.alignItems = 'center';
+            startScreen.style.zIndex = '100';
+            startScreen.style.color = 'white';
+            startScreen.innerHTML = `
+                <h2 style="margin-bottom: 20px;">مرحباً في المغامر السحري!</h2>
+                <p style="margin-bottom: 30px;">اضغط على الزر أدناه لبدء اللعب</p>
+                <button id="startButton" style="
+                    padding: 15px 30px;
+                    font-size: 18px;
+                    background: #6a1b9a;
+                    color: white;
+                    border: none;
+                    border-radius: 50px;
+                    cursor: pointer;
+                ">
+                    ابدأ اللعب
+                </button>
+            `;
+            
+            document.body.appendChild(startScreen);
+            
+            // عند تفاعل المستخدم
+            document.getElementById('startButton').addEventListener('click', function() {
+                userInteracted = true;
+                startScreen.style.display = 'none';
+                
+                // محاولة تشغيل الصوت لتجنب المشاكل لاحقاً
+                try {
+                    jumpSound.volume = 0.5;
+                    jumpSound.play().then(() => {
+                        jumpSound.pause();
+                        jumpSound.currentTime = 0;
+                    }).catch(e => console.log('تهيئة الصوت:', e));
+                } catch (e) {
+                    console.log('خطأ في تهيئة الصوت:', e);
+                }
+                
+                startGame();
+            });
+            
+            // دالة القفز المعدلة
+            // function jump() {
+            //     if (!userInteracted || isJumping || isGameOver) return;
+                
+            //     isJumping = true;
+            //     player.classList.add('jumping');
+                
+            //     // تشغيل الصوت مع معالجة الأخطاء
+            //     try {
+            //         jumpSound.currentTime = 0;
+            //         jumpSound.volume = 0.3;
+            //         jumpSound.play().catch(e => console.log('خطأ في صوت القفز:', e));
+            //     } catch (e) {
+            //         console.log('خطأ في تشغيل الصوت:', e);
+            //     }
+                
+            //     setTimeout(() => {
+            //         player.classList.remove('jumping');
+            //         isJumping = false;
+            //     }, 900);
+            // }
+            
+            // بقية الكود كما هو...  
+            
+            // function startGame() {
+            //     if (!userInteracted) return;
+                
+            //     // ... (بقية كود startGame السابق)
+                
+            //     // تشغيل الموسيقى الخلفية بحذر
+            //     try {
+            //         backgroundMusic.volume = 0.2;
+            //         backgroundMusic.loop = true;
+            //         backgroundMusic.play().catch(e => {
+            //             console.log('لا يمكن تشغيل الموسيقى حتى يتفاعل المستخدم:', e);
+            //         });
+            //     } catch (e) {
+            //         console.log('خطأ في تشغيل الموسيقى:', e);
+            //     }
+            // }
+        });
+    </script>
+</body>
+</html>

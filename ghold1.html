@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>اضرب الخلد - Dark Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 2em;
+      color: #ff4081;
+    }
+    #game-area {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 10px;
+      max-width: 360px;
+      width: 100%;
+      margin-top: 20px;
+    }
+    .hole {
+      background-color: #333;
+      border-radius: 10px;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: background-color 0.3s;
+    }
+    .hole:hover {
+      background-color: #444;
+    }
+    .mole {
+      width: 60%;
+      height: 60%;
+      background-color: #4caf50;
+      border-radius: 50%;
+      animation: pop 0.3s ease-in-out;
+      box-shadow: 0 0 15px #4caf50;
+    }
+    @keyframes pop {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    #score, #timer, #high-score {
+      margin: 5px;
+      font-size: 1.2em;
+      text-align: center;
+    }
+    #start-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+      background-color: #ff4081;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #start-btn:hover {
+      background-color: #e91e63;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 اضرب الخلد</h1>
+  <div id="score">النقاط: 0</div>
+  <div id="timer">الوقت: 30</div>
+  <div id="high-score">🏆 أعلى نتيجة: 0</div>
+  <div id="game-area"></div>
+  <button id="start-btn">ابدأ اللعب</button>
+  <button id="start-btn"><a href="index.html">back</a></button>
+
+  <script>
+    const gameArea = document.getElementById("game-area");
+    const scoreDisplay = document.getElementById("score");
+    const timerDisplay = document.getElementById("timer");
+    const highScoreDisplay = document.getElementById("high-score");
+    const startBtn = document.getElementById("start-btn");
+
+    let score = 0;
+    let highScore = localStorage.getItem("moleHighScore") || 0;
+    let currentMole;
+    let gameTime = 30;
+    let timer;
+
+    highScoreDisplay.textContent = `🏆 أعلى نتيجة: ${highScore}`;
+
+    function createGrid() {
+      gameArea.innerHTML = "";
+      for (let i = 0; i < 9; i++) {
+        const hole = document.createElement("div");
+        hole.classList.add("hole");
+        hole.dataset.index = i;
+        gameArea.appendChild(hole);
+      }
+    }
+
+    function showMole() {
+      const holes = document.querySelectorAll(".hole");
+      holes.forEach(h => h.innerHTML = "");
+      const index = Math.floor(Math.random() * 9);
+      const mole = document.createElement("div");
+      mole.classList.add("mole");
+      mole.addEventListener("click", hitMole);
+      holes[index].appendChild(mole);
+      currentMole = mole;
+    }
+
+    function hitMole() {
+      score++;
+      scoreDisplay.textContent = `النقاط: ${score}`;
+      showMole();
+    }
+
+    function startGame() {
+      score = 0;
+      scoreDisplay.textContent = "النقاط: 0";
+      timerDisplay.textContent = `الوقت: ${gameTime}`;
+      createGrid();
+      showMole();
+      startBtn.style.display = "none";
+
+      timer = setInterval(() => {
+        gameTime--;
+        timerDisplay.textContent = `الوقت: ${gameTime}`;
+        if (gameTime <= 0) {
+          clearInterval(timer);
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function endGame() {
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("moleHighScore", score);
+        highScoreDisplay.textContent = `🏆 أعلى نتيجة: ${score}`;
+      }
+      alert("انتهت اللعبة! نقاطك: " + score);
+      gameTime = 30;
+      startBtn.style.display = "block";
+    }
+
+    startBtn.addEventListener("click", startGame);
+  </script>
+</body>
+</html>
